@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip Analytics - Complete Source Code</title>
+    <style>
+        /* 🎨 THEME & BASE STYLES */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0d1117;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* 💳 WALLET HEADER */
+        .header {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            background: #161b22;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+        }
+
+        .wallet {
+            color: #58a6ff;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .btn-add {
+            background-color: #238636;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* 🎮 GAME INTERFACE */
+        .game-container {
+            width: 100%;
+            max-width: 360px;
+            background: #161b22;
+            border-radius: 16px;
+            padding: 25px 20px;
+            text-align: center;
+            border: 1px solid #30363d;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
+        /* 🪙 COIN 3D ANIMATION SYSTEM */
+        .coin-box {
+            perspective: 1000px;
+            margin: 20px auto 35px auto;
+            width: 110px;
+            height: 110px;
+        }
+
+        .coin {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.2s ease-out;
+        }
+
+        .coin-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            border: 5px solid #00ff66;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+        }
+
+        .heads {
+            background: linear-gradient(45deg, #1f4037, #99f2c8);
+            color: #0d1117;
+        }
+
+        .tails {
+            background: linear-gradient(45deg, #ffd700, #b8860b);
+            color: #0d1117;
+            transform: rotateY(180deg);
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        /* 🎯 BETTING CONTROLS */
+        .bet-input {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            width: 85%;
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-choice {
+            flex: 1;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-head { background-color: #00ff66; color: #0d1117; }
+        .btn-tail { background-color: #ffd700; color: #0d1117; }
+        .btn-choice:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* 📊 RECENT HISTORY TRENDS */
+        .history-box {
+            width: 100%;
+            max-width: 360px;
+            margin-top: 20px;
+            background: #161b22;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+        }
+
+        .history-title {
+            font-size: 0.85rem;
+            color: #8b949e;
+            margin-bottom: 10px;
+        }
+
+        .history-list {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .history-item {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        /* 🔳 POPUP BARCODE MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #161b22;
+            padding: 25px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 330px;
+            text-align: center;
+            border: 1px solid #30363d;
+        }
+
+        .qr-img {
+            width: 200px;
+            height: 200px;
+            margin: 15px 0;
+            border-radius: 12px;
+            border: 4px solid #ffffff;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .btn-submit {
+            background-color: #00ff66;
+            color: #0d1117;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .btn-close {
+            background: #da3637;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- WALLET HEADER -->
+    <div class="header">
+        <div class="wallet" id="wallet-display">Wallet: ₹100</div>
+        <button class="btn-add" onclick="toggleModal(true)">Add Money</button>
+    </div>
+
+    <!-- MAIN GAME AREA -->
+    <div class="game-container">
+        <div class="coin-box">
+            <div class="coin" id="coin-element">
+                <div class="coin-face heads">H</div>
+                <div class="coin-face tails">T</div>
+            </div>
+        </div>
+
+        <div class="bet-section">
+            <input type="number" id="bet-amount" class="bet-input" value="10" min="1" placeholder="Bet Amount (₹)">
+            <div class="action-btns">
+                <button class="btn-choice btn-head" onclick="playGame('H')">HEAD</button>
+                <button class="btn-choice btn-tail" onclick="playGame('T')">TAIL</button>
+            </div>
+        </div>
+        <div id="status-msg" style="font-weight: bold; min-height: 24px; color: #8b949e; margin-top: 15px;">Apni bet lagayein!</div>
+    </div>
+
+    <!-- RECENT TRENDS -->
+    <div class="history-box">
+        <div class="history-title">Recent Trends (Pichle Results)</div>
+        <div class="history-list" id="history-container"></div>
+    </div>
+
+    <!-- QR CODE POPUP MODAL -->
+    <div class="modal" id="qr-modal">
+        <div class="modal-content">
+            <h3 style="color: #00ff66;">Scan Barcode to Pay</h3>
+            <p style="font-size: 0.85rem; color: #8b949e; margin-top: 5px;">Scan karke payment karein aur niche detail dalein</p>
+            
+            <!-- GitHub automatically picks my_qr.png from the same repository -->
+            <img src="my_qr.png" alt="My UPI Barcode" class="qr-img">
+            
+            <input type="number" id="deposit-amount" class="modal-input" placeholder="Kitne paise bheje? (₹)">
+            <input type="text" id="utr-number" class="modal-input" placeholder="Enter UTR / Ref No.">
+            
+            <button class="btn-submit" onclick="submitDeposit()">Submit Request</button>
+            <button class="btn-close" onclick="toggleModal(false)">Cancel</button>
+        </div>
+    </div>
+
+    <!-- 🧠 JAVASCRIPT GAME LOGIC -->
+    <script>
+        let balance = parseInt(localStorage.getItem('my_wallet_balance')) || 100;
+        let history = JSON.parse(localStorage.getItem('game_history')) || [];
+        let currentRotation = 0;
+
+        const walletDisplay = document.getElementById('wallet-display');
+        const coinElement = document.getElementById('coin-element');
+        const statusMsg = document.getElementById('status-msg');
+        const historyContainer = document.getElementById('history-container');
+        const betButtons = document.querySelectorAll('.btn-choice');
+
+        function updateUI() {
+            walletDisplay.innerText = `Wallet: ₹${balance}`;
+            localStorage.setItem('my_wallet_balance', balance);
+            
+            historyContainer.innerHTML = '';
+            history.slice(-5).reverse().forEach(res => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.style.backgroundColor = res === 'H' ? '#00ff66' : '#ffd700';
+                item.style.color = '#0d1117';
+                item.innerText = res;
+                historyContainer.appendChild(item);
+            });
+            localStorage.setItem('game_history', JSON.stringify(history));
+        }
+
+        function toggleModal(show) {
+            document.getElementById('qr-modal').style.display = show ? 'flex' : 'none';
+        }
+
+        function submitDeposit() {
+            const amount = document.getElementById('deposit-amount').value;
+            const utr = document.getElementById('utr-number').value;
+
+            if(!amount || !utr) {
+                alert("Kripya Amount aur UTR number dono dalein!");
+                return;
+            }
+
+            alert(`Request Received!\nAmount: ₹${amount}\nUTR: ${utr}\n\nAdmin check karke add kar dega.`);
+            
+            balance += parseInt(amount); 
+            updateUI();
+            toggleModal(false);
+            
+            document.getElementById('deposit-amount').value = '';
+            document.getElementById('utr-number').value = '';
+        }
+
+        function playGame(playerChoice) {
+            const betAmount = parseInt(document.getElementById('bet-amount').value);
+
+            if (isNaN(betAmount) || betAmount <= 0) {
+                alert("Sahi bet amount dalein!");
+                return;
+            }
+            if (betAmount > balance) {
+                alert("Wallet me balance kam hai! Add Money par click karein.");
+                return;
+            }
+
+            betButtons.forEach(btn => btn.disabled = true);
+            statusMsg.innerText = "Coin ghoom raha hai...";
+            statusMsg.style.color = "#8b949e";
+            
+            const isHead = Math.random() < 0.5;
+            currentRotation += 1440 + (isHead ? 0 : 180); 
+            coinElement.style.transform = `rotateY(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                const finalResult = isHead ? 'H' : 'T';
+
+                if (playerChoice === finalResult) {
+                    balance += betAmount;
+                    statusMsg.innerText = `🎉 Jeet Gaye! Result ${finalResult === 'H' ? 'Head' : 'Tail'} aaya.`;
+                    statusMsg.style.color = '#00ff66';
+                } else {
+                    balance -= betAmount;
+                    statusMsg.innerText = `❌ Haar Gaye! Result ${finalResult === 'H' ? 'Head' : 'Tail'} aaya.`;
+                    statusMsg.style.color = '#da3637';
+                }
+
+                history.push(finalResult);
+                if(history.length > 10) history.shift();
+
+                updateUI();
+                betButtons.forEach(btn => btn.disabled = false);
+            }, 1200);
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
