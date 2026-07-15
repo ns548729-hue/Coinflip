@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -43,14 +44,31 @@
             font-size: 1.1rem;
         }
 
+        .header-btns {
+            display: flex;
+            gap: 8px;
+        }
+
         .btn-add {
             background-color: #238636;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 12px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .btn-withdraw {
+            background-color: #da3637;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
         }
 
         /* 🎮 GAME INTERFACE */
@@ -177,7 +195,7 @@
             font-size: 0.85rem;
         }
 
-        /* 🔳 POPUP BARCODE MODAL */
+        /* 🔳 POPUP MODAL SYSTEM */
         .modal {
             display: none;
             position: fixed;
@@ -230,7 +248,7 @@
         }
 
         .btn-close {
-            background: #da3637;
+            background: #30363d;
             color: white;
             border: none;
             padding: 10px;
@@ -245,7 +263,10 @@
     <!-- WALLET HEADER -->
     <div class="header">
         <div class="wallet" id="wallet-display">Wallet: ₹100</div>
-        <button class="btn-add" onclick="toggleModal(true)">Add Money</button>
+        <div class="header-btns">
+            <button class="btn-add" onclick="toggleModal('qr-modal', true)">Add</button>
+            <button class="btn-withdraw" onclick="toggleModal('withdraw-modal', true)">Withdraw</button>
+        </div>
     </div>
 
     <!-- MAIN GAME AREA -->
@@ -273,20 +294,33 @@
         <div class="history-list" id="history-container"></div>
     </div>
 
-    <!-- QR CODE POPUP MODAL -->
+    <!-- QR CODE POPUP MODAL (DEPOSIT) -->
     <div class="modal" id="qr-modal">
         <div class="modal-content">
             <h3 style="color: #00ff66;">Scan Barcode to Pay</h3>
             <p style="font-size: 0.85rem; color: #8b949e; margin-top: 5px;">Scan karke payment karein aur niche detail dalein</p>
             
-            <!-- GitHub automatically picks my_qr.png from the same repository -->
             <img src="my_qr.png" alt="My UPI Barcode" class="qr-img">
             
             <input type="number" id="deposit-amount" class="modal-input" placeholder="Kitne paise bheje? (₹)">
             <input type="text" id="utr-number" class="modal-input" placeholder="Enter UTR / Ref No.">
             
             <button class="btn-submit" onclick="submitDeposit()">Submit Request</button>
-            <button class="btn-close" onclick="toggleModal(false)">Cancel</button>
+            <button class="btn-close" onclick="toggleModal('qr-modal', false)">Cancel</button>
+        </div>
+    </div>
+
+    <!-- WITHDRAW POPUP MODAL -->
+    <div class="modal" id="withdraw-modal">
+        <div class="modal-content">
+            <h3 style="color: #da3637;">Withdraw Money</h3>
+            <p style="font-size: 0.85rem; color: #8b949e; margin-top: 5px; margin-bottom: 15px;">Apne jeete hue paise nikalne ke liye details bharein</p>
+            
+            <input type="number" id="withdraw-amount" class="modal-input" placeholder="Amount nikalne ke liye (₹)">
+            <input type="text" id="upi-id" class="modal-input" placeholder="Enter UPI ID (e.g. name@apl)">
+            
+            <button class="btn-submit" style="background-color: #da3637; color: white;" onclick="submitWithdraw()">Submit Withdrawal</button>
+            <button class="btn-close" onclick="toggleModal('withdraw-modal', false)">Cancel</button>
         </div>
     </div>
 
@@ -318,8 +352,8 @@
             localStorage.setItem('game_history', JSON.stringify(history));
         }
 
-        function toggleModal(show) {
-            document.getElementById('qr-modal').style.display = show ? 'flex' : 'none';
+        function toggleModal(modalId, show) {
+            document.getElementById(modalId).style.display = show ? 'flex' : 'none';
         }
 
         function submitDeposit() {
@@ -331,14 +365,37 @@
                 return;
             }
 
-            alert(`Request Received!\nAmount: ₹${amount}\nUTR: ${utr}\n\nAdmin check karke add kar dega.`);
+            alert(`Deposit Request Received!\nAmount: ₹${amount}\nUTR: ${utr}\n\nAdmin check karke add kar dega.`);
             
             balance += parseInt(amount); 
             updateUI();
-            toggleModal(false);
+            toggleModal('qr-modal', false);
             
             document.getElementById('deposit-amount').value = '';
             document.getElementById('utr-number').value = '';
+        }
+
+        function submitWithdraw() {
+            const amount = parseInt(document.getElementById('withdraw-amount').value);
+            const upi = document.getElementById('upi-id').value;
+
+            if(!amount || !upi) {
+                alert("Kripya Amount aur UPI ID dono dalein!");
+                return;
+            }
+            if(amount > balance) {
+                alert("Aapke wallet mein itne paise nahi hain!");
+                return;
+            }
+
+            alert(`Withdrawal Request Received!\nAmount: ₹${amount}\nUPI ID: ${upi}\n\nAdmin 24 ghante mein transfer kar dega.`);
+            
+            balance -= amount; 
+            updateUI();
+            toggleModal('withdraw-modal', false);
+            
+            document.getElementById('withdraw-amount').value = '';
+            document.getElementById('upi-id').value = '';
         }
 
         function playGame(playerChoice) {
