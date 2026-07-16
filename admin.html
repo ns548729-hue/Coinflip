@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Panel</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .control-box {
+            background: #2d2d2d;
+            padding: 30px;
+            border-radius: 15px;
+            display: inline-block;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .btn {
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.2s;
+        }
+        .btn-heads { background: #ffd700; color: black; }
+        .btn-tails { background: #c0c0c0; color: black; }
+        .btn:active { transform: scale(0.95); }
+        #current {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #03dac6;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Admin Controller</h1>
+    <p>Agla result kya aana chahiye? Neeche se select karein:</p>
+
+    <div class="control-box">
+        <button class="btn btn-heads" onclick="setResult('Heads')">HEADS</button>
+        <button class="btn btn-tails" onclick="setResult('Tails')">TAILS</button>
+        <div id="current">Loading current setting...</div>
+    </div>
+
+    <!-- Firebase SDK Setup -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIdaSyBNMb-pZCrgEN4-b8rmU5d",
+            authDomain: "coinflip-game-703d0.firebaseapp.com",
+            projectId: "coinflip-game-703d0",
+            storageBucket: "coinflip-game-703d0.appspot.com",
+            messagingSenderId: "393705116749",
+            appId: "1:393705116749:web:11321389e",
+            databaseURL: "https://coinflip-game-703d0-default-rtdb.firebaseio.com/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const gameRef = ref(db, 'gameState');
+
+        // Database mein data save karne ke liye function
+        window.setResult = function(value) {
+            set(gameRef, { nextResult: value })
+            .then(() => alert("Setting saved: " + value))
+            .catch((error) => alert("Error: " + error.message));
+        }
+
+        // Live setting screen par dekhne ke liye
+        onValue(gameRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.nextResult) {
+                document.getElementById('current').innerText = "Current Active Setup: " + data.nextResult.toUpperCase();
+            } else {
+                document.getElementById('current').innerText = "No setup active (Default: Heads)";
+            }
+        });
+    </script>
+</body>
+</html>
